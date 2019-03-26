@@ -70,9 +70,24 @@ server.delete('/api/zoos/:id', async (req, res) => {
     res.status(500).json(error);
   }
 });
-knex('users')
-  .where({ id: 135 })
-  .update({ email: 'hi@example.com' });
+
+// ============== UPDATE ROUTES ============= //
+
+server.put('/api/zoos/:id', async (req, res) => {
+  try {
+    const updatedAnimalObject = await db('zoos')
+      .where({ id: req.params.id })
+      .update(req.body);
+    const updatedAnimalArray = await db('zoos').where({ id: req.params.id });
+    if (updatedAnimalObject) {
+      res.status(200).json(updatedAnimalArray[0]);
+    } else {
+      res.status(400).json({ message: 'Animal with provided id does not exist' });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
 
 const port = 3300;
 server.listen(port, function() {
