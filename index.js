@@ -19,8 +19,21 @@ server.use(helmet());
 
 server.get('/api/zoos', async (req, res) => {
   try {
-    const zoos = await db('zoos');
-    res.status(200).json(zoos);
+    const animalsInZoo = await db('zoos');
+    res.status(200).json(animalsInZoo);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+server.get('/api/zoos/:id', async (req, res) => {
+  try {
+    const specificAnimalInZoo = await db('zoos').where({ id: req.params.id });
+    if (specificAnimalInZoo.length >= 1) {
+      res.status(200).json(specificAnimalInZoo[0]);
+    } else {
+      res.status(400).json({ message: 'Object with provided id is not in the database' });
+    }
   } catch (error) {
     res.status(500).json(error);
   }
@@ -29,9 +42,13 @@ server.get('/api/zoos', async (req, res) => {
 // ============== POST ROUTES ============= //
 server.post('/api/zoos', async (req, res) => {
   try {
-    const newZoo = await db('zoos').insert({ name: req.body.name });
-    const zooObject = await db('zoos').where({ id: newZoo[0] });
-    res.status(200).json(zooObject[0]);
+    if (req.body.name) {
+      const newAnimalInZoo = await db('zoos').insert({ name: req.body.name });
+      const newAnimalInZooObject = await db('zoos').where({ id: newAnimalInZoo[0] });
+      res.status(200).json(newAnimalInZooObject[0]);
+    } else {
+      res.status(400).json({ message: 'Please make sure that you are sending request in following format [POST] { name: nameOfAnimalInZoo }' });
+    }
   } catch (error) {
     res.status(500).json(error);
   }
